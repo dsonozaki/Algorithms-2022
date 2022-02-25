@@ -2,6 +2,11 @@
 
 package lesson1
 
+import java.io.File
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
+
+
 /**
  * Сортировка времён
  *
@@ -32,8 +37,20 @@ package lesson1
  *
  * В случае обнаружения неверного формата файла бросить любое исключение.
  */
+// T=O(N*log(N)) - стандартная сортировка Kotlin
+// R=O(N)
 fun sortTimes(inputName: String, outputName: String) {
-    TODO()
+    val pattern = DateTimeFormatter.ofPattern("hh:mm:ss a")
+    val writer = File(outputName).bufferedWriter()
+    var result = File(inputName).readLines()
+    if (result.size == 1)
+        LocalTime.parse(result[0], pattern)
+    else {
+        result = result.sortedBy { LocalTime.parse(it, pattern) }
+    }
+    for (line in result)
+        writer.appendLine(line)
+    writer.close()
 }
 
 /**
@@ -62,8 +79,52 @@ fun sortTimes(inputName: String, outputName: String) {
  *
  * В случае обнаружения неверного формата файла бросить любое исключение.
  */
+// T=O(С*N*log(N)) - стандартная сортировка Kotlin + операции над отсортированным массивом
+// R=O(N)
 fun sortAddresses(inputName: String, outputName: String) {
-    TODO()
+    val writer = File(outputName).bufferedWriter()
+    val spliter = " - "
+    var list = File(inputName).readLines()
+    val regex = "[А-Яа-яё-]+ [А-Яа-яё-]+ - [А-Яа-яё-]+ \\d+".toRegex()
+    if (list.size == 1) {
+        if (!list[0].matches(regex))
+            throw Exception("wrong input")
+        else {
+            val newline = list[0].split(spliter)
+            val result = newline[1] + spliter + newline[0]
+            writer.appendLine(result)
+            writer.close()
+            return
+        }
+    } else {
+        list = list.sortedBy {
+            if (!it.matches(regex)) {
+                println(it)
+                throw Exception("wrong input")
+            }
+            val c = it.split(spliter)
+            val k = c[1].split(" ")
+            k[0] + " " + k[1].length + k[1] + spliter + c[0] //добавляем перед номером дома длину номера, чтобы более длинные числа при сортировке оказывались после коротких вне зависимости от их первой цифры
+        }
+    }
+    var temp = ""
+    for (i in 0..list.lastIndex) {
+        val newline = list[i].split(spliter)
+        if (i != list.lastIndex) {
+            val next = list[i + 1].split(spliter)
+            temp = if (newline[1] == next[1]) {
+                "$temp${newline[0]}, "
+            } else {
+                val result = newline[1] + spliter + temp + newline[0]
+                writer.appendLine(result)
+                ""
+            }
+        } else {
+            val result = newline[1] + spliter + temp + newline[0]
+            writer.appendLine(result)
+        }
+    }
+    writer.close()
 }
 
 /**
@@ -96,8 +157,18 @@ fun sortAddresses(inputName: String, outputName: String) {
  * 99.5
  * 121.3
  */
+// T=O(N) - сортировка подсчётом
+// R=O(N)
 fun sortTemperatures(inputName: String, outputName: String) {
-    TODO()
+    val size = 7731
+    val array = mutableListOf<Int>()
+    val writer = File(outputName).bufferedWriter()
+    val reader = File(inputName).readLines().forEach { array.add((it.toDouble() * 10 + 2730).toInt()) }
+    val result1 = countingSort(array.toIntArray(), size)
+    for (i in result1) {
+        writer.appendLine(((i - 2730).toDouble() / 10.0).toString())
+    }
+    writer.close()
 }
 
 /**

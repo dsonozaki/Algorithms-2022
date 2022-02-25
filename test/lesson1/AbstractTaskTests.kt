@@ -1,10 +1,12 @@
 package lesson1
 
 import org.junit.jupiter.api.Assertions.assertArrayEquals
+import org.junit.jupiter.api.Assertions.assertThrows
 import util.PerfResult
 import util.estimate
 import java.io.BufferedWriter
 import java.io.File
+import java.time.format.DateTimeParseException
 import java.util.*
 import kotlin.math.abs
 import kotlin.system.measureNanoTime
@@ -51,6 +53,35 @@ abstract class AbstractTaskTests : AbstractFileTests() {
         } finally {
             File("temp.txt").delete()
         }
+        val errortime = """
+            
+            12:
+            12:08 AM
+            12:68
+            25:27 AM
+            20:12 PM
+            20:12:47 XM
+            fgdfsdgas
+            """.trimIndent()
+        var i = 0
+        for (str in errortime.lines()) {
+            File("input/time_error.txt").createNewFile()
+            val writer = File("input/time_error.txt").bufferedWriter()
+            writer.appendLine(str)
+            writer.close()
+            try {
+                sortTimes("input/time_error.txt", "temp.txt")
+            } catch (ex: Exception) {
+                File("input/time_error.txt").delete()
+                println(ex)
+                i++
+            }
+        }
+        assert(i == 8)
+        assertThrows(DateTimeParseException::class.java) {
+            sortTimes("input/onetime_error.txt", "temp.txt")
+        }
+        File("temp.txt").delete()
     }
 
     protected fun sortAddresses(sortAddresses: (String, String) -> Unit) {
@@ -85,6 +116,43 @@ abstract class AbstractTaskTests : AbstractFileTests() {
         } finally {
             File("temp.txt").delete()
         }
+        try {
+            sortAddresses("input/addr_extra.txt", "temp.txt")
+            assertFileContent("temp.txt", File("input/addr_out4.txt").readLines())
+        } finally {
+            File("temp.txt").delete()
+        }
+        val errortime = """
+            НосковДжейкоб - Чернышевского 67
+            Носков Джейкоб Чернышевского 67
+            Носков - Чернышевского 67
+            Носков Джейкоб - Чернышевского
+
+            Носков Джейкоб-Чернышевского 67
+            Носков Джейкоб - 67
+            Носков Джейкоб Яковлевич - Чернышевского 67
+            Носков Джейкоб - Чернышевского кр 67
+            """.trimIndent()
+        var i = 0
+        for (str in errortime.lines()) {
+            File("input/addr_error.txt").createNewFile()
+            val writer = File("input/addr_error.txt").bufferedWriter()
+            writer.appendLine(str)
+            writer.close()
+            try {
+                sortAddresses("input/addr_error.txt", "temp.txt")
+            } catch (ex: Exception) {
+                println(str)
+                File("input/addr_error.txt").delete()
+                println(ex)
+                i++
+            }
+        }
+        assert(i == 9)
+        assertThrows(Exception::class.java) {
+            sortAddresses("input/one_wrong_add.txt", "temp.txt")
+        }
+        File("temp.txt").delete()
     }
 
     private fun generateTemperatures(size: Int): PerfResult<Unit> {
@@ -130,12 +198,39 @@ abstract class AbstractTaskTests : AbstractFileTests() {
         } finally {
             File("temp.txt").delete()
         }
+
         try {
             sortTemperatures("input/empty.txt", "temp.txt")
             assertFileContent("temp.txt", "")
         } finally {
             File("temp.txt").delete()
         }
+        val errortemp = """
+            -274.0
+            gdhdfh
+            
+            511.0
+            """.trimIndent()
+        var i = 0
+        for (str in errortemp.lines()) {
+            File("input/temp_error.txt").createNewFile()
+            val writer = File("input/temp_error.txt").bufferedWriter()
+            writer.appendLine(str)
+            writer.close()
+            try {
+                sortTemperatures("input/temp_error.txt", "temp.txt")
+            } catch (ex: Exception) {
+                println(str)
+                File("input/temp_error.txt").delete()
+                println(ex)
+                i++
+            }
+        }
+        assert(i == 4)
+        assertThrows(Exception::class.java) {
+            sortTemperatures("input/one_wrong_temp.txt", "temp.txt")
+        }
+        File("temp.txt").delete()
 
         fun testGeneratedTemperatures(size: Int): PerfResult<Unit> {
             try {
