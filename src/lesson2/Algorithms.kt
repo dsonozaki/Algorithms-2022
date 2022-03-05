@@ -2,6 +2,9 @@
 
 package lesson2
 
+import java.lang.Math.sqrt
+import kotlin.math.pow
+
 /**
  * Получение наибольшей прибыли (она же -- поиск максимального подмассива)
  * Простая
@@ -94,8 +97,45 @@ fun josephTask(menNumber: Int, choiceInterval: Int): Int {
  * Если имеется несколько самых длинных общих подстрок одной длины,
  * вернуть ту из них, которая встречается раньше в строке first.
  */
+// T = O(M*N)
+// R = O(С*N)
+// N = second.length
+// M = first.length
 fun longestCommonSubstring(first: String, second: String): String {
-    TODO()
+    var i = 0
+    var memoryij = Array(2) { Array(second.length) { 0 } }
+    var lastIndex = 0
+    var length = 0
+    var max = 0
+    while (i <= first.lastIndex) {
+        var j = 0
+        while (j <= second.lastIndex) {
+            if (first[i] == second[j]) {
+                var c = 0
+                if (i == 0) {
+                    memoryij[0][j] = 1
+                    length = 1
+                }
+                if (j > 0)
+                    c = memoryij[0][j - 1]
+                if (c == 0) {
+                    length = 1
+                    memoryij[1][j] = 1
+                } else {
+                    memoryij[1][j] = c + 1
+                    length = c + 1
+                    if (length > max) {
+                        max = length
+                        lastIndex = i
+                    }
+                }
+            }
+            j++
+        }
+        memoryij = arrayOf(memoryij[1], Array(second.length) { 0 })
+        i++
+    }
+    return (first.substring(lastIndex + 1 - max, lastIndex + 1))
 }
 
 /**
@@ -108,6 +148,20 @@ fun longestCommonSubstring(first: String, second: String): String {
  * Справка: простым считается число, которое делится нацело только на 1 и на себя.
  * Единица простым числом не считается.
  */
+// T=O(N*ln(ln(N))) - решето Эратосфена
+// R=O(N)
+// N=limit
 fun calcPrimesNumber(limit: Int): Int {
-    TODO()
+    if (limit <= 1)
+        return 0
+    val array = BooleanArray(limit) { true }
+    array[0] = false
+    for (i in 2..(sqrt(limit.toDouble())).toInt()) {
+        var j = i.toDouble().pow(2).toInt()
+        while (j <= limit) {
+            array[j - 1] = false
+            j += i
+        }
+    }
+    return (array.count { it })
 }

@@ -14,6 +14,9 @@ import kotlin.system.measureNanoTime
 abstract class AbstractTaskTests : AbstractFileTests() {
 
     protected fun sortTimes(sortTimes: (String, String) -> Unit) {
+        assertThrows(Exception::class.java) {
+            sortAddresses("input/blabla.txt", "temp.txt")
+        }
         try {
             sortTimes("input/time_in1.txt", "temp.txt")
             assertFileContent(
