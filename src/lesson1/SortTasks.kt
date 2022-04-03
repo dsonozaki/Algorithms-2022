@@ -42,15 +42,16 @@ import java.time.format.DateTimeFormatter
 fun sortTimes(inputName: String, outputName: String) {
     val pattern = DateTimeFormatter.ofPattern("hh:mm:ss a")
     val writer = File(outputName).bufferedWriter()
-    var result = File(inputName).readLines()
-    if (result.size == 1)
-        LocalTime.parse(result[0], pattern)
-    else {
-        result = result.sortedBy { LocalTime.parse(it, pattern) }
+    writer.use { writer ->
+        var result = File(inputName).readLines()
+        if (result.size == 1)
+            LocalTime.parse(result[0], pattern)
+        else {
+            result = result.sortedBy { LocalTime.parse(it, pattern) }
+        }
+        for (line in result)
+            writer.appendLine(line)
     }
-    for (line in result)
-        writer.appendLine(line)
-    writer.close()
 }
 
 /**
@@ -169,6 +170,7 @@ fun sortTemperatures(inputName: String, outputName: String) {
         writer.appendLine(((i - 2730).toDouble() / 10.0).toString())
     }
     writer.close()
+
 }
 
 /**
