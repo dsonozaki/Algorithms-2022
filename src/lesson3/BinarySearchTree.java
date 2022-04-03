@@ -73,7 +73,7 @@ public class BinarySearchTree<T extends Comparable<T>> extends AbstractSet<T> im
             return false;
         }
         Node<T> newNode = new Node<>(t);
-        newNode.prev=closest;
+        newNode.prev = closest;
         if (closest == null) {
             root = newNode;
         } else if (comparison < 0) {
@@ -103,7 +103,7 @@ public class BinarySearchTree<T extends Comparable<T>> extends AbstractSet<T> im
         if (!this.contains(o))
             return false;
         Node<T> current = find(root, (T) o);
-        System.out.println (current.value);
+        System.out.println(current.value);
         Node<T> parent = current.prev;
         if (current.left == null && current.right == null) {
             if (parent.left == current)
@@ -121,9 +121,10 @@ public class BinarySearchTree<T extends Comparable<T>> extends AbstractSet<T> im
             } else {
                 if (parent.left == current)
                     parent.left = current.left;
-                else
+                else {
                     parent.right = current.left;
-                current.left.prev = parent;
+                    current.left.prev = parent;
+                }
             }
         } else {
             Node<T> successor = getnext(current);
@@ -145,18 +146,18 @@ public class BinarySearchTree<T extends Comparable<T>> extends AbstractSet<T> im
 
     public Node getnext(Node x) {
         if (x.right != null)
-        return minimum(x.right);
+            return minimum(x.right);
         Node y = x.prev;
-        while (y != null && x ==y.right){
+        while (y != null && x == y.right) {
             x = y;
             y = y.prev;
         }
         return y;
     }
 
-    public Node minimum(Node x){
+    public Node minimum(Node x) {
         if (x.left == null)
-        return x;
+            return x;
         return minimum(x.left);
     }
 
