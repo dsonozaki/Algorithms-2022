@@ -1,6 +1,7 @@
 package lesson3;
 
 import java.util.*;
+
 import kotlin.NotImplementedError;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -9,9 +10,10 @@ import org.jetbrains.annotations.Nullable;
 public class BinarySearchTree<T extends Comparable<T>> extends AbstractSet<T> implements CheckableSortedSet<T> {
 
     private static class Node<T> {
-        final T value;
+        T value;
         Node<T> left = null;
-        Node<T> right = null;
+        Node right = null;
+        Node prev;
 
         Node(T value) {
             this.value = value;
@@ -36,12 +38,10 @@ public class BinarySearchTree<T extends Comparable<T>> extends AbstractSet<T> im
         int comparison = value.compareTo(start.value);
         if (comparison == 0) {
             return start;
-        }
-        else if (comparison < 0) {
+        } else if (comparison < 0) {
             if (start.left == null) return start;
             return find(start.left, value);
-        }
-        else {
+        } else {
             if (start.right == null) return start;
             return find(start.right, value);
         }
@@ -57,12 +57,12 @@ public class BinarySearchTree<T extends Comparable<T>> extends AbstractSet<T> im
 
     /**
      * Добавление элемента в дерево
-     *
+     * <p>
      * Если элемента нет в множестве, функция добавляет его в дерево и возвращает true.
      * В ином случае функция оставляет множество нетронутым и возвращает false.
-     *
+     * <p>
      * Спецификация: {@link Set#add(Object)} (Ctrl+Click по add)
-     *
+     * <p>
      * Пример
      */
     @Override
@@ -73,14 +73,13 @@ public class BinarySearchTree<T extends Comparable<T>> extends AbstractSet<T> im
             return false;
         }
         Node<T> newNode = new Node<>(t);
+        newNode.prev=closest;
         if (closest == null) {
             root = newNode;
-        }
-        else if (comparison < 0) {
+        } else if (comparison < 0) {
             assert closest.left == null;
             closest.left = newNode;
-        }
-        else {
+        } else {
             assert closest.right == null;
             closest.right = newNode;
         }
@@ -90,19 +89,75 @@ public class BinarySearchTree<T extends Comparable<T>> extends AbstractSet<T> im
 
     /**
      * Удаление элемента из дерева
-     *
+     * <p>
      * Если элемент есть в множестве, функция удаляет его из дерева и возвращает true.
      * В ином случае функция оставляет множество нетронутым и возвращает false.
      * Высота дерева не должна увеличиться в результате удаления.
-     *
+     * <p>
      * Спецификация: {@link Set#remove(Object)} (Ctrl+Click по remove)
-     *
+     * <p>
      * Средняя
      */
     @Override
     public boolean remove(Object o) {
-        // TODO
-        throw new NotImplementedError();
+        if (!this.contains(o))
+            return false;
+        Node<T> current = find(root, (T) o);
+        System.out.println (current.value);
+        Node<T> parent = current.prev;
+        if (current.left == null && current.right == null) {
+            if (parent.left == current)
+                parent.left = null;
+            if (parent.right == current)
+                parent.right = null;
+        } else if (current.left == null || current.right == null) {
+            if (current.left == null) {
+                if (parent.left == current)
+                    parent.left = current.right;
+                else {
+                    parent.right = current.right;
+                    current.right.prev = parent;
+                }
+            } else {
+                if (parent.left == current)
+                    parent.left = current.left;
+                else
+                    parent.right = current.left;
+                current.left.prev = parent;
+            }
+        } else {
+            Node<T> successor = getnext(current);
+            System.out.println(successor.value);
+            current.value = successor.value;
+            if (successor.prev.left == successor) {
+                successor.prev.left = successor.right;
+                if (successor.right != null)
+                    successor.right.prev = successor.prev;
+            } else {
+                successor.prev.right = successor.right;
+                if (successor.right != null)
+                    successor.right.prev = successor.prev;
+            }
+        }
+        size--;
+        return true;
+    }
+
+    public Node getnext(Node x) {
+        if (x.right != null)
+        return minimum(x.right);
+        Node y = x.prev;
+        while (y != null && x ==y.right){
+            x = y;
+            y = y.prev;
+        }
+        return y;
+    }
+
+    public Node minimum(Node x){
+        if (x.left == null)
+        return x;
+        return minimum(x.left);
     }
 
     @Nullable
@@ -114,60 +169,76 @@ public class BinarySearchTree<T extends Comparable<T>> extends AbstractSet<T> im
     @NotNull
     @Override
     public Iterator<T> iterator() {
-        return new BinarySearchTreeIterator();
+        return new BinarySearchTreeIterator(root);
     }
 
     public class BinarySearchTreeIterator implements Iterator<T> {
+        Stack<Node> leftstack = new Stack<Node>();
 
-        private BinarySearchTreeIterator() {
-            // Добавьте сюда инициализацию, если она необходима.
+        public void TreeIterator(Node root) {
+            while (root != null) {
+                leftstack.push(root);
+                root = root.left;
+            }
+        }
+
+        private BinarySearchTreeIterator(Node node) {
+            TreeIterator(node);
         }
 
         /**
          * Проверка наличия следующего элемента
-         *
+         * <p>
          * Функция возвращает true, если итерация по множеству ещё не окончена (то есть, если вызов next() вернёт
          * следующий элемент множества, а не бросит исключение); иначе возвращает false.
-         *
+         * <p>
          * Спецификация: {@link Iterator#hasNext()} (Ctrl+Click по hasNext)
-         *
+         * <p>
          * Средняя
          */
         @Override
         public boolean hasNext() {
-            // TODO
-            throw new NotImplementedError();
+            return !leftstack.isEmpty();
         }
 
         /**
          * Получение следующего элемента
-         *
+         * <p>
          * Функция возвращает следующий элемент множества.
          * Так как BinarySearchTree реализует интерфейс SortedSet, последовательные
          * вызовы next() должны возвращать элементы в порядке возрастания.
-         *
+         * <p>
          * Бросает NoSuchElementException, если все элементы уже были возвращены.
-         *
+         * <p>
          * Спецификация: {@link Iterator#next()} (Ctrl+Click по next)
-         *
+         * <p>
          * Средняя
          */
         @Override
         public T next() {
-            // TODO
-            throw new NotImplementedError();
+            if (!hasNext()) throw new NoSuchElementException();
+            Node node = leftstack.pop();
+            T result = (T) node.value;
+            if (node.right != null) {
+                node = node.right;
+                while (node != null) {
+                    leftstack.push(node);
+                    node = node.left;
+                }
+            }
+            return result;
         }
 
         /**
          * Удаление предыдущего элемента
-         *
+         * <p>
          * Функция удаляет из множества элемент, возвращённый крайним вызовом функции next().
-         *
+         * <p>
          * Бросает IllegalStateException, если функция была вызвана до первого вызова next() или же была вызвана
          * более одного раза после любого вызова next().
-         *
+         * <p>
          * Спецификация: {@link Iterator#remove()} (Ctrl+Click по remove)
-         *
+         * <p>
          * Сложная
          */
         @Override
@@ -175,22 +246,23 @@ public class BinarySearchTree<T extends Comparable<T>> extends AbstractSet<T> im
             // TODO
             throw new NotImplementedError();
         }
+
     }
 
     /**
      * Подмножество всех элементов в диапазоне [fromElement, toElement)
-     *
+     * <p>
      * Функция возвращает множество, содержащее в себе все элементы дерева, которые
      * больше или равны fromElement и строго меньше toElement.
      * При равенстве fromElement и toElement возвращается пустое множество.
      * Изменения в дереве должны отображаться в полученном подмножестве, и наоборот.
-     *
+     * <p>
      * При попытке добавить в подмножество элемент за пределами указанного диапазона
      * должен быть брошен IllegalArgumentException.
-     *
+     * <p>
      * Спецификация: {@link SortedSet#subSet(Object, Object)} (Ctrl+Click по subSet)
      * (настоятельно рекомендуется прочитать и понять спецификацию перед выполнением задачи)
-     *
+     * <p>
      * Очень сложная (в том случае, если спецификация реализуется в полном объёме)
      */
     @NotNull
@@ -202,16 +274,16 @@ public class BinarySearchTree<T extends Comparable<T>> extends AbstractSet<T> im
 
     /**
      * Подмножество всех элементов строго меньше заданного
-     *
+     * <p>
      * Функция возвращает множество, содержащее в себе все элементы дерева строго меньше toElement.
      * Изменения в дереве должны отображаться в полученном подмножестве, и наоборот.
-     *
+     * <p>
      * При попытке добавить в подмножество элемент за пределами указанного диапазона
      * должен быть брошен IllegalArgumentException.
-     *
+     * <p>
      * Спецификация: {@link SortedSet#headSet(Object)} (Ctrl+Click по headSet)
      * (настоятельно рекомендуется прочитать и понять спецификацию перед выполнением задачи)
-     *
+     * <p>
      * Сложная
      */
     @NotNull
@@ -223,16 +295,16 @@ public class BinarySearchTree<T extends Comparable<T>> extends AbstractSet<T> im
 
     /**
      * Подмножество всех элементов нестрого больше заданного
-     *
+     * <p>
      * Функция возвращает множество, содержащее в себе все элементы дерева нестрого больше toElement.
      * Изменения в дереве должны отображаться в полученном подмножестве, и наоборот.
-     *
+     * <p>
      * При попытке добавить в подмножество элемент за пределами указанного диапазона
      * должен быть брошен IllegalArgumentException.
-     *
+     * <p>
      * Спецификация: {@link SortedSet#tailSet(Object)} (Ctrl+Click по tailSet)
      * (настоятельно рекомендуется прочитать и понять спецификацию перед выполнением задачи)
-     *
+     * <p>
      * Сложная
      */
     @NotNull
