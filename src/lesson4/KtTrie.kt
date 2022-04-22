@@ -1,5 +1,6 @@
 package lesson4
 
+import lesson3.BinarySearchTree
 import java.util.*
 
 /**
@@ -9,6 +10,8 @@ class KtTrie : AbstractMutableSet<String>(), MutableSet<String> {
 
     private class Node {
         val children: SortedMap<Char, Node> = sortedMapOf()
+        var parent: Node? = null
+        var ch: Char? = null
     }
 
     private val root = Node()
@@ -43,8 +46,10 @@ class KtTrie : AbstractMutableSet<String>(), MutableSet<String> {
                 current = child
             } else {
                 modified = true
-                val newChild = Node()
+                var newChild = Node()
                 current.children[char] = newChild
+                newChild.parent = current
+                newChild.ch = char
                 current = newChild
             }
         }
@@ -58,6 +63,7 @@ class KtTrie : AbstractMutableSet<String>(), MutableSet<String> {
         val current = findNode(element) ?: return false
         if (current.children.remove(0.toChar()) != null) {
             size--
+            print("removed $element")
             return true
         }
         return false
@@ -71,7 +77,60 @@ class KtTrie : AbstractMutableSet<String>(), MutableSet<String> {
      * Сложная
      */
     override fun iterator(): MutableIterator<String> {
-        TODO()
+        return TrieIterator();
     }
 
+    inner class TrieIterator : MutableIterator<String> {
+        private var stack = Stack<String>()
+        private var result = ""
+        private var node = root
+        private var next = ""
+        private var overuse = false
+
+        init {
+            initiation();
+            stack.reverse()
+        }
+
+        private fun initiation() {
+            for (child in node.children) {
+                if (child.key == 0.toChar()) {
+                    var n = node
+                    result += node.ch
+                    while (n.parent?.ch != null) {
+                        result += n.parent!!.ch
+                        n = n.parent!!
+                    }
+                    stack.push(result.reversed())
+                    result = ""
+                } else {
+                    node = child.value
+                    initiation()
+                }
+            }
+        }
+
+        // T=O(N) (наверное, зависит от размера stack)
+        // R=O(1)
+        override fun hasNext(): Boolean {
+            return (stack.isNotEmpty())
+        }
+
+        // T=O(1)
+        // R=O(1)
+        override fun next(): String {
+            if (!hasNext()) throw NoSuchElementException()
+            next = stack.pop()
+            return (next)
+        }
+
+        // T=O(1)
+        // R=O(1)
+        override fun remove() {
+            if (next.isBlank() || overuse) throw IllegalStateException()
+            remove(next)
+            overuse = true
+        }
+
+    }
 }

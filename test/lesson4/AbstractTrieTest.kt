@@ -99,7 +99,8 @@ abstract class AbstractTrieTest {
             val trieIter = trieSet.iterator()
             println("Checking if the iterator traverses the entire set...")
             while (trieIter.hasNext()) {
-                controlSet.remove(trieIter.next())
+                val x = trieIter.next()
+                controlSet.remove(x)
             }
             assertTrue(
                 controlSet.isEmpty(),
@@ -109,6 +110,33 @@ abstract class AbstractTrieTest {
                 trieIter.next()
             }
             println("All clear!")
+        }
+        println("additional test started")
+        val delSet = sortedSetOf<String>()
+        for (i in 1..15) {
+            val string = random.nextString("abcdefgh", 1, 15)
+            delSet.add(string)
+        }
+        var delete = delSet.toMutableList()
+        val trie = create()
+        for (element in delSet) {
+            trie += element
+        }
+        for (i in 1..15) {
+            val k = random.nextInt(16 - i)
+            println("deleting element ${delete[k]}")
+            trie.remove(delete[k])
+            delete.removeAt(k)
+            var j = 0
+            println("delete=$delete")
+            val iter = trie.iterator()
+            while (j < 15 - i) {
+                var next = iter.next()
+                println("next=$next")
+                println("delete=${delete[j]}")
+                assertTrue("Something went wrong after deletion of element") { next == delete[j] }
+                j++
+            }
         }
     }
 

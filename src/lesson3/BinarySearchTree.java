@@ -114,17 +114,15 @@ public class BinarySearchTree<T extends Comparable<T>> extends AbstractSet<T> im
             if (current.left == null) {
                 if (parent.left == current)
                     parent.left = current.right;
-                else {
+                else
                     parent.right = current.right;
-                    current.right.prev = parent;
-                }
+                current.right.prev = parent;
             } else {
                 if (parent.left == current)
                     parent.left = current.left;
-                else {
+                else
                     parent.right = current.left;
-                    current.left.prev = parent;
-                }
+                current.left.prev = parent;
             }
         } else {
             Node<T> successor = getnext(current);
