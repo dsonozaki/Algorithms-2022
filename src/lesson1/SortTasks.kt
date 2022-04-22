@@ -85,47 +85,48 @@ fun sortTimes(inputName: String, outputName: String) {
 fun sortAddresses(inputName: String, outputName: String) {
     val writer = File(outputName).bufferedWriter()
     val spliter = " - "
-    var list = File(inputName).readLines()
-    val regex = "[А-Яа-яё-]+ [А-Яа-яё-]+ - [А-Яа-яё-]+ \\d+".toRegex()
-    if (list.size == 1) {
-        if (!list[0].matches(regex))
-            throw Exception("wrong input")
-        else {
-            val newline = list[0].split(spliter)
-            val result = newline[1] + spliter + newline[0]
-            writer.appendLine(result)
-            writer.close()
-            return
-        }
-    } else {
-        list = list.sortedBy {
-            if (!it.matches(regex)) {
-                println(it)
+    writer.use {
+        var list = File(inputName).readLines()
+        val regex = "[А-Яа-яё-]+ [А-Яа-яё-]+ - [А-Яа-яё-]+ \\d+".toRegex()
+        if (list.size == 1) {
+            if (!list[0].matches(regex))
                 throw Exception("wrong input")
+            else {
+                val newline = list[0].split(spliter)
+                val result = newline[1] + spliter + newline[0]
+                writer.appendLine(result)
+                writer.close()
+                return
             }
-            val c = it.split(spliter)
-            val k = c[1].split(" ")
-            k[0] + " " + k[1].length + k[1] + spliter + c[0] //добавляем перед номером дома длину номера, чтобы более длинные числа при сортировке оказывались после коротких вне зависимости от их первой цифры
+        } else {
+            list = list.sortedBy {
+                if (!it.matches(regex)) {
+                    println(it)
+                    throw Exception("wrong input")
+                }
+                val c = it.split(spliter)
+                val k = c[1].split(" ")
+                k[0] + " " + k[1].length + k[1] + spliter + c[0] //добавляем перед номером дома длину номера, чтобы более длинные числа при сортировке оказывались после коротких вне зависимости от их первой цифры
+            }
         }
-    }
-    var temp = ""
-    for (i in 0..list.lastIndex) {
-        val newline = list[i].split(spliter)
-        if (i != list.lastIndex) {
-            val next = list[i + 1].split(spliter)
-            temp = if (newline[1] == next[1]) {
-                "$temp${newline[0]}, "
+        var temp = ""
+        for (i in 0..list.lastIndex) {
+            val newline = list[i].split(spliter)
+            if (i != list.lastIndex) {
+                val next = list[i + 1].split(spliter)
+                temp = if (newline[1] == next[1]) {
+                    "$temp${newline[0]}, "
+                } else {
+                    val result = newline[1] + spliter + temp + newline[0]
+                    writer.appendLine(result)
+                    ""
+                }
             } else {
                 val result = newline[1] + spliter + temp + newline[0]
                 writer.appendLine(result)
-                ""
             }
-        } else {
-            val result = newline[1] + spliter + temp + newline[0]
-            writer.appendLine(result)
         }
     }
-    writer.close()
 }
 
 /**
