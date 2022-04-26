@@ -95,7 +95,6 @@ fun sortAddresses(inputName: String, outputName: String) {
                 val newline = list[0].split(spliter)
                 val result = newline[1] + spliter + newline[0]
                 writer.appendLine(result)
-                writer.close()
                 return
             }
         } else {

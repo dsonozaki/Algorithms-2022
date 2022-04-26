@@ -2,6 +2,10 @@
 
 package lesson6
 
+import lesson6.Graph.Edge
+import lesson6.Graph.Vertex
+import lesson6.impl.GraphBuilder
+
 /**
  * Эйлеров цикл.
  * Средняя
@@ -28,8 +32,40 @@ package lesson6
  * Справка: Эйлеров цикл -- это цикл, проходящий через все рёбра
  * связного графа ровно по одному разу
  */
-fun Graph.findEulerLoop(): List<Graph.Edge> {
-    TODO()
+
+// T = O(V)
+// R = O(E)
+fun Graph.findEulerLoop(): List<Edge> {
+    val bridges = findBridges().toMutableSet()
+    println("start")
+    if (vertices.isEmpty()) return emptyList()
+    val startvertex = vertices.random()
+    var currentvertex = startvertex
+    var nextvertex: Vertex
+    val pastedges = mutableListOf<Edge>()
+    while (true) {
+        val bridgevertex = mutableSetOf<Vertex>()
+        bridges.filter { it.begin == currentvertex }.forEach { bridgevertex += it.end }
+        val pastvertex = mutableSetOf<Vertex>()
+        pastedges.filter { it.begin == currentvertex || it.end == currentvertex }
+            .forEach { pastvertex += it.end; pastvertex += it.begin }
+        val near = getNeighbors(currentvertex).minus(pastvertex)
+        if (near.isEmpty()) {
+            return if (pastedges.size == edges.size && currentvertex == startvertex)
+                pastedges
+            else
+                emptyList()
+        }
+        nextvertex = try {
+            near.minus(bridgevertex).random()
+        } catch (e: NoSuchElementException) {
+            near.random()
+        }
+        val edge = getConnection(currentvertex, nextvertex)
+        pastedges += edge!!
+        pastedges.forEach { println("сохранена дуга ${it.begin.name} ${it.end.name}") }
+        currentvertex = nextvertex
+    }
 }
 
 /**
@@ -60,8 +96,18 @@ fun Graph.findEulerLoop(): List<Graph.Edge> {
  * |
  * J ------------ K
  */
+// T = O(V^2)
+// R = O(V)
 fun Graph.minimumSpanningTree(): Graph {
-    TODO()
+    val result = GraphBuilder().apply {
+        edges.forEach {
+            addVertex(it.begin.name)
+            addVertex(it.end.name)
+            if (this.build().shortestPath(it.begin).unrollPath(it.end).size == 1)
+                addConnection(it.begin, it.end)
+        }
+    }.build()
+    return result
 }
 
 /**
@@ -88,7 +134,7 @@ fun Graph.minimumSpanningTree(): Graph {
  *
  * Если на входе граф с циклами, бросить IllegalArgumentException
  */
-fun Graph.largestIndependentVertexSet(): Set<Graph.Vertex> {
+fun Graph.largestIndependentVertexSet(): Set<Vertex> {
     TODO()
 }
 

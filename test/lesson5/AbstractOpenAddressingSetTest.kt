@@ -119,6 +119,33 @@ abstract class AbstractOpenAddressingSetTest {
             }
             println("All clear!")
         }
+        println("additional test started")
+        val delSet = sortedSetOf<String>()
+        for (i in 1..15) {
+            val string = random.nextString("abcdefgh12345678", 1, 15)
+            delSet.add(string)
+        }
+        var delete = delSet.toMutableList()
+        val openAddressingSet = create<String>(random.nextInt(6) + 4)
+        for (element in delSet) {
+            openAddressingSet += element
+        }
+        for (i in 1..15) {
+            val k = random.nextInt(16 - i)
+            println("deleting element ${delete[k]}")
+            openAddressingSet.remove(delete[k])
+            delete.removeAt(k)
+            var j = 0
+            println("delete=$delete")
+            val iter = openAddressingSet.iterator()
+            while (j < 15 - i) {
+                var next = iter.next()
+                println("next=$next")
+                println("delete=${delete[j]}")
+                assertTrue("Something went wrong after deletion of element") { delete.contains(next) }
+                j++
+            }
+        }
     }
 
     protected fun doIteratorRemoveTest() {
