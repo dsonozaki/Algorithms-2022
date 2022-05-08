@@ -89,7 +89,6 @@ class KtTrie : AbstractMutableSet<String>(), MutableSet<String> {
         private var stack = Stack<Pair<Node, String>>()
         private var next = Pair<Node?, String>(null, "")
         private var overuse = false
-        val writer = File("input/logs.txt").bufferedWriter()
 
         init {
             initiation(root, "")
@@ -105,7 +104,6 @@ class KtTrie : AbstractMutableSet<String>(), MutableSet<String> {
                 r += first
             }
             stack.push(Pair(n, r))
-            println(r)
         }
 
         // T=O(1)
@@ -134,8 +132,6 @@ class KtTrie : AbstractMutableSet<String>(), MutableSet<String> {
                     var c = -2
                     var new = Pair<Char, Node?>(' ', null)
                     node.parent?.children?.forEach {
-                        writer.write(it.key.toString())
-                        writer.newLine()
                         if (it.key == chr)
                             c = i
                         if (i == c + 1) {

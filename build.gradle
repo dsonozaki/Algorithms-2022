@@ -19,6 +19,7 @@ buildscript {
 plugins {
     id 'java'
     id 'org.jetbrains.kotlin.jvm' version '1.5.32'
+    id "me.champeau.jmh" version "0.6.6"
 }
 
 group 'ru.spbstu'
@@ -101,3 +102,5 @@ task kotoedRun(
             .sort()
     packages = testPackages
 }
+
+

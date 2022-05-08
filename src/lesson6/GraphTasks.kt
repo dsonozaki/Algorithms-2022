@@ -34,7 +34,7 @@ import lesson6.impl.GraphBuilder
  */
 
 // T = O(V)
-// R = O(E)
+// R = O(V+E) (максимальный размер pastvertex - все вершины, максимальный размер pastedges - все рёбра)
 fun Graph.findEulerLoop(): List<Edge> {
     val bridges = findBridges().toMutableSet()
     println("start")
@@ -56,14 +56,13 @@ fun Graph.findEulerLoop(): List<Edge> {
             else
                 emptyList()
         }
-        nextvertex = try {
-            near.minus(bridgevertex).random()
-        } catch (e: NoSuchElementException) {
+        val reduced = near.minus(bridgevertex)
+        nextvertex = if (reduced.isNotEmpty())
+            reduced.random()
+        else
             near.random()
-        }
         val edge = getConnection(currentvertex, nextvertex)
         pastedges += edge!!
-        pastedges.forEach { println("сохранена дуга ${it.begin.name} ${it.end.name}") }
         currentvertex = nextvertex
     }
 }
@@ -96,7 +95,7 @@ fun Graph.findEulerLoop(): List<Edge> {
  * |
  * J ------------ K
  */
-// T = O(V^2)
+// T = O(E*(V+E)*logV) (edges.forEach (E)*трудоёмкость поиска кратчайшего пути по алгоритму Дейкстры O((V+E)*logV))
 // R = O(V)
 fun Graph.minimumSpanningTree(): Graph {
     val result = GraphBuilder().apply {

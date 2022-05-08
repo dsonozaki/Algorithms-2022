@@ -24,6 +24,9 @@ class KtOpenAddressingSet<T : Any>(private val bits: Int) : AbstractMutableSet<T
         return hashCode() and (0x7FFFFFFF shr (31 - bits))
     }
 
+    private val Removed = object {
+    }
+
     /**
      * Проверка, входит ли данный элемент в таблицу
      */
@@ -54,7 +57,7 @@ class KtOpenAddressingSet<T : Any>(private val bits: Int) : AbstractMutableSet<T
         val startingIndex = element.startingIndex()
         var index = startingIndex
         var current = storage[index]
-        while (current != null && current != false) {
+        while (current != null && current != Removed) {
             if (current == element) {
                 return false
             }
@@ -66,8 +69,6 @@ class KtOpenAddressingSet<T : Any>(private val bits: Int) : AbstractMutableSet<T
         size++
         return true
     }
-
-    class Removed()
 
     /**
      * Удаление элемента из таблицы
@@ -87,7 +88,7 @@ class KtOpenAddressingSet<T : Any>(private val bits: Int) : AbstractMutableSet<T
         var current = storage[index]
         while (current != null) {
             if (current == element) {
-                storage[index] = false
+                storage[index] = Removed
                 size--
                 return true
             }
@@ -124,7 +125,7 @@ class KtOpenAddressingSet<T : Any>(private val bits: Int) : AbstractMutableSet<T
         private fun initiation(start: Int) {
             var i = start
             while (i <= storage.lastIndex) {
-                if (storage[i] != null && storage[i] != false) {
+                if (storage[i] != null && storage[i] != Removed) {
                     stack.push(Pair(storage[i] as T1, i))
                     break
                 }
@@ -147,7 +148,7 @@ class KtOpenAddressingSet<T : Any>(private val bits: Int) : AbstractMutableSet<T
             return (next.first as T1)
         }
 
-        //T=O(1)
+        //T=O(n) - худший случай (совпадает с функцией remove вне итератора)
         //R=O(1)
         override fun remove() {
             if (next.first == null || overuse) throw IllegalStateException()

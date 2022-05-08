@@ -45,27 +45,36 @@ abstract class AbstractOpenAddressingSetTest {
         for (iteration in 1..100) {
             val bitsNumber = random.nextInt(4) + 6
             val openAddressingSet = create<Int>(bitsNumber)
+            val booleanSet = create<Boolean>(bitsNumber)
             for (i in 1..50) {
                 val firstInt = random.nextInt(32)
                 val secondInt = firstInt + (1 shl bitsNumber)
+                val firstbool = random.nextBoolean()
+                val secondbool = firstbool.not()
                 openAddressingSet += secondInt
                 openAddressingSet += firstInt
+                booleanSet += firstbool
+                booleanSet += secondbool
                 val expectedSize = openAddressingSet.size - 1
                 assertTrue(
-                    openAddressingSet.remove(secondInt),
+                    openAddressingSet.remove(secondInt) && booleanSet.remove(secondbool),
                     "An element wasn't removed contrary to expected."
                 )
                 assertFalse(
-                    secondInt in openAddressingSet,
+                    secondInt in openAddressingSet && booleanSet.last() == secondbool,
                     "A supposedly removed element is still in the set."
                 )
                 assertTrue(
-                    firstInt in openAddressingSet,
+                    firstInt in openAddressingSet && booleanSet.last() == firstbool,
                     "The removal of the element prevented access to the other elements."
                 )
                 assertEquals(
                     expectedSize, openAddressingSet.size,
                     "The size of the set is not as expected."
+                )
+                assertEquals(
+                    1, booleanSet.size,
+                    "The size of the booleanSet is not as expected."
                 )
                 assertFalse(
                     openAddressingSet.remove(secondInt),
