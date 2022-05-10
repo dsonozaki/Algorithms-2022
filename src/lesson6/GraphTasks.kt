@@ -39,7 +39,7 @@ fun Graph.findEulerLoop(): List<Edge> {
     val bridges = findBridges().toMutableSet()
     println("start")
     if (vertices.isEmpty()) return emptyList()
-    val startvertex = vertices.random()
+    val startvertex = vertices.maxByOrNull { getNeighbors(it).size }
     var currentvertex = startvertex
     var nextvertex: Vertex
     val pastedges = mutableListOf<Edge>()
@@ -49,12 +49,15 @@ fun Graph.findEulerLoop(): List<Edge> {
         val pastvertex = mutableSetOf<Vertex>()
         pastedges.filter { it.begin == currentvertex || it.end == currentvertex }
             .forEach { pastvertex += it.end; pastvertex += it.begin }
-        val near = getNeighbors(currentvertex).minus(pastvertex)
+        val near = getNeighbors(currentvertex!!).minus(pastvertex)
         if (near.isEmpty()) {
             return if (pastedges.size == edges.size && currentvertex == startvertex)
                 pastedges
-            else
+            else {
+                println(pastedges)
+                println(bridges)
                 emptyList()
+            }
         }
         val reduced = near.minus(bridgevertex)
         nextvertex = if (reduced.isNotEmpty())
